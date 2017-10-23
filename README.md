@@ -1,4 +1,4 @@
-# This repo is a 4DN-DCIC fork of the original repli-seq pipeline Shart, without docker.
+* This repo is a 4DN-DCIC fork of the original repli-seq pipeline Shart, without docker.
 
 ## what
 
