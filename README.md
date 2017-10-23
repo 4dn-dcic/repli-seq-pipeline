@@ -1,35 +1,11 @@
-# shart
-
-*S*cripts for *H*igh-throughput *A*nalysis of *R*eplication *T*iming 
-
-A dockerfile and scripts for executing a semi-automatated repli-seq analysis pipeline
+# This repo is a 4DN-DCIC fork of the original repli-seq pipeline Shart, without docker.
 
 ## what
 
-This repository contains a dockerfile and scripts in order to generate replication timing profiles from a set of raw reads from sequencing of either early- and late-replicating DNA, or from DNA extracted from cells sorted for S or G1 DNA content.
-
-The scripts for executing the pipeline are under the `scripts` which are added from this repository to the docker image during build time.
-
-A docker image for executing these scripts can be built yourself or pulled from docker hub (vera/docker-4dn-repliseq).
+This repository contains scripts in order to generate replication timing profiles from a set of raw reads from sequencing of either early- and late-replicating DNA, or from DNA extracted from cells sorted for S or G1 DNA content.
 
 ## how
 
-### example usage
-```bash
-# execute a step on data in the current directory
-docker run -u $UID -w $PWD -v $PWD:$PWD:rw vera/docker-4dn-repliseq <name_of_script> <args> 
-````
-
-### step-by-step workflow
-
-#### setup
-```bash
-# pull the pre-built image, create and enter a container inside the directory with your data
-docker run --rm -it -h d4r -u $UID -w $PWD -v $PWD:$PWD:rw vera/docker-4dn-repliseq
-
-# define number of CPU threads to use for the pipeline
-export NUMTHREADS=8
-```
 #### define your input files
 
 ```bash
