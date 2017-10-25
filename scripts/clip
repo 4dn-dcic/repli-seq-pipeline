@@ -1,65 +1,20 @@
-#!/usr/bin/env bash
+#!/bin/bash
+f=$1
+outdir=$2  # default "."
+outprefix=$3  # default "out"
 
-usage() {
-  echo "Usage: $(basename $0) [-t threads ] fastq1 [fastq2 ... fastqN ]" 1>&2
-  echo "" 1>&2
-  exit 1
-}
-
-while getopts ":t:" opt; do
-  case $opt in
-  t)
-    NTHREADS=$OPTARG
-   ;;
-  \?)
-   echo "Invalid option: -$OPTARG" >&2
-   usage
-   ;;
-  [?])
-   usage
-   ;;
-  :)
-   echo "Option -$OPTARG requires an argument." >&2
-   echo "" >&2
-   usage
-   ;;
-  esac
-done
-
-if [ -z $NTHREADS ]; then
-  if [ -z $NUMTHREADS ]; then
-    NTHREADS=1
-  else
-    NTHREADS=$NUMTHREADS
-  fi
+if [ -z $outdir ]; then
+  outdir=.
 fi
 
-shift $((OPTIND-1))
-
-if [[ -z $@ ]]; then
-  INPUT=$(cat /dev/stdin)
-else
-  INPUT=$@
+if [ -z $outprefix ]; then
+  outprefix=out
 fi
 
+ADAPTER=AGATCGGAAGAGCACACGTCTG
 
-clip(){
-  INPUT=$1
-  for f in $INPUT; do
-   # check if file exists
-   if [[ ! -f $f ]]; then echo "fastq file \"$f\" not found"; exit 1; fi
-   # check input is a fastq
-   if [[ $f != *.fastq ]] && [[ $f != *.fq ]] && [[ $f != *.gz ]]; then echo "input is not a fastq"; exit 1; fi
-   
-   BASE="$(basename $f | sed 's/\.gz$//g' | sed 's/\.fq$//g' | sed 's/\.fastq$//g')"
-   OUTPUT=${BASE}_clip.fastq
-   LOGFILE=${OUTPUT}.log
-   
-   cutadapt -a AGATCGGAAGAGCACACGTCTG -q 0 -O 1 -m 0 -o $OUTPUT $f > $LOGFILE
-   echo $OUTPUT
-  done 
-}
+OUTPUT=$outdir/$outprefix.clip.fastq
+LOGFILE=$OUTPUT.log
 
-export -f clip
+cutadapt -a $ADAPTER -q 0 -O 1 -m 0 -o $OUTPUT $f > $LOGFILE
 
-parallel --no-notice -k -j $NTHREADS "clip {}" ::: $INPUT
