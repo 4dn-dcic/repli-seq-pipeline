@@ -1,0 +1,12 @@
+#!/bin/bash
+
+fastq1=$1
+index=$2
+outdir=$3
+prefix=$4
+nThreads=$5
+
+
+# run bwa
+bwa mem -t $nThreads -v 2 $index $fastq1 | samtools view -Shb - > $prefix.bam
+
