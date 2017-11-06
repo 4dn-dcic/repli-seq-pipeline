@@ -1,72 +1,20 @@
 #!/usr/bin/env bash
-
-usage() {
-  echo "Usage: $(basename $0) [-t threads ] fastq1 [fastq2 ... fastqN ]" 1>&2
-  echo "" 1>&2
-  exit 1
-}
-
-while getopts ":t:" opt; do
-  case $opt in
-  t)
-    NTHREADS=$OPTARG
-   ;;
-  \?)
-   echo "Invalid option: -$OPTARG" >&2
-   usage
-   ;;
-  [?])
-   usage
-   ;;
-  :)
-   echo "Option -$OPTARG requires an argument." >&2
-   echo "" >&2
-   usage
-   ;;
-  esac
-done
-
-if [ -z $NTHREADS ]; then
-  if [ -z $NUMTHREADS ]; then
-    NTHREADS=1
-  else
-    NTHREADS=$NUMTHREADS
-  fi
-fi
-
-shift $((OPTIND-1))
-
-if [[ -z $@ ]]; then
-  INPUT=$(cat /dev/stdin)
+INPUT=$1
+OUTPREFIX=$2
+  
+# check if file exists
+if [[ ! -f $INPUT ]]; then echo "file \"$INPUT\" not found"; exit 1; fi
+  
+UCOUNT=$(samtools view $INPUT | cut -f 1 | head -n 1000 | sort | uniq | wc -l)
+  
+if [[ UCOUNT -lt 1000 ]]; then
+  PAIRARG=""
 else
-  INPUT=$@
-fi
-
-dedup(){
-  INPUT=$1
+  PAIRARG="-s"
+fi 
   
-  # check if file exists
-  if [[ ! -f $INPUT ]]; then echo "file \"$INPUT\" not found"; exit 1; fi
+BASE=$OUTPREFIX
+OUTPUT=${BASE}_rmdup.bam
+LOGFILE=${BASE}_rmdup.bam.log
   
-  # check input is a fastq
-  if [[ $INPUT != *.bam ]]; then echo "input is not a bam file"; exit 1; fi
-  
-  UCOUNT=$(samtools view $INPUT | cut -f 1 | head -n 1000 | sort | uniq | wc -l)
-  
-  if [[ UCOUNT -lt 1000 ]]; then
-    PAIRARG=""
-  else
-    PAIRARG="-s"
-  fi 
-  
-  BASE="$(basename $INPUT | sed 's/\.bam$//g')"
-  OUTPUT=${BASE}_rmdup.bam
-  LOGFILE=${BASE}_rmdup.bam.log
-  
-  samtools rmdup $PAIRARG $INPUT $OUTPUT 2> $LOGFILE
-  echo $OUTPUT
-}
-
-export -f dedup
-
-parallel --no-notice -k -j $NTHREADS "dedup {}" ::: $INPUT
+samtools rmdup $PAIRARG $INPUT $OUTPUT 2> $LOGFILE

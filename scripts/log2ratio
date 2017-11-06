@@ -1,80 +1,22 @@
 #!/usr/bin/env bash
+EBG=$1
+LBG=$2
+OUTPREFIX=$3
 
-usage() {
-  echo "Usage: $(basename $0) [-t threads ] sample1_early.bg [sample2_early.bg sampleN_early.bg ] sample1_late.bg [sample2_late.bg sampleN_late.bg]" 1>&2
-  echo "" 1>&2
-  exit 1
-}
+# check if file exists
+if [[ ! -f $EBG ]]; then echo "file \"$EBG\" not found"; exit 1; fi
+if [[ ! -f $LBG ]]; then echo "file \"$LBG\" not found"; exit 1; fi
 
-while getopts ":t:" opt; do
-  case $opt in
-  t)
-    NTHREADS=$OPTARG
-   ;;
-  \?)
-   echo "Invalid option: -$OPTARG" >&2
-   usage
-   ;;
-  [?])
-   usage
-   ;;
-  :)
-   echo "Option -$OPTARG requires an argument." >&2
-   echo "" >&2
-   usage
-   ;;
-  esac
-done
+# check input is a fastq
+if [[ $EBG != *.bg ]]; then echo "input is not a bedGraph file"; exit 1; fi
+if [[ $LBG != *.bg ]]; then echo "input is not a bedGraph file"; exit 1; fi
 
-if [ -z $NTHREADS ]; then
-  if [ -z $NUMTHREADS ]; then
-    NTHREADS=1
-  else
-    NTHREADS=$NUMTHREADS
-  fi
-fi
-
-shift $((OPTIND-1))
-
-if [[ -z $@ ]]; then
-  INPUT=$(cat /dev/stdin)
-else
-  INPUT=$@
-fi
-
-NUMSAMPLES=$(echo $INPUT | tr ' ' '\n' | paste - - | wc -l)
-EBGS=$(echo $INPUT | tr ' ' '\n' | head -n $NUMSAMPLES)
-LBGS=$(echo $INPUT | tr ' ' '\n' | tail -n $NUMSAMPLES)
-
-l2r(){
-  EBG=$1
-  LBG=$2
-  # check if file exists
-  if [[ ! -f $EBG ]]; then echo "file \"$EBG\" not found"; exit 1; fi
-  if [[ ! -f $LBG ]]; then echo "file \"$LBG\" not found"; exit 1; fi
-  
-  # check input is a fastq
-  if [[ $EBG != *.bg ]]; then echo "input is not a bedGraph file"; exit 1; fi
-  if [[ $LBG != *.bg ]]; then echo "input is not a bedGraph file"; exit 1; fi
-  
-  EMIN=$(cut -f 4 $EBG | sort | uniq -c | awk '{print $2-a;a=$2}' | sort | uniq -c | awk '{print $1,$2}' | sort -k1,1nr | head -n 1 | cut -d' ' -f 2)
-  LMIN=$(cut -f 4 $LBG | sort | uniq -c | awk '{print $2-a;a=$2}' | sort | uniq -c | awk '{print $1,$2}' | sort -k1,1nr | head -n 1 | cut -d' ' -f 2)
-  
-  OUTPUT="$(basename $EBG | sed 's/\.bg$/_l2r\.bg/g')"
-  LOGFILE=${OUTPUT}.log
-  
-  paste $EBG $LBG | awk -v emin=$EMIN -v lmin=$LMIN '{print $1,$2,$3,log(($4+emin)/($8+lmin))/log(2)}' OFS='\t' > $OUTPUT
-  
-  echo $OUTPUT
-}
-
-export -f l2r
-
-# using 1 thread until I figure out how to get equivalent function of --link with older versions of parallel
-parallel --no-notice -k -j 1 l2r ::: $EBGS ::: $LBGS
+EMIN=$(cut -f 4 $EBG | sort | uniq -c | awk '{print $2-a;a=$2}' | sort | uniq -c | awk '{print $1,$2}' | sort -k1,1nr | head -n 1 | cut -d' ' -f 2)
+LMIN=$(cut -f 4 $LBG | sort | uniq -c | awk '{print $2-a;a=$2}' | sort | uniq -c | awk '{print $1,$2}' | sort -k1,1nr | head -n 1 | cut -d' ' -f 2)
 
 
-# BGLINES=$(wc -l $EARLYBG | cut -d" " -f 1)
-# RTLINES=$(wc -l ${PREFIX}.bg | cut -d" " -f 1)
-# PCTZEROES=$(echo "${RTLINES}/${BGLINES}" | bc -l)
-# echo "${PCTZEROES} of the ${BGLINES} windows have 0 reads in either fraction" > ${PREFIX}.bg.log
+OUTPUT=$OUTPREFIX.l2r.out  ## is this bg?
+LOGFILE=${OUTPUT}.log
+
+paste $EBG $LBG | awk -v emin=$EMIN -v lmin=$LMIN '{print $1,$2,$3,log(($4+emin)/($8+lmin))/log(2)}' OFS='\t' > $OUTPUT
+

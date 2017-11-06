@@ -1,62 +1,6 @@
 #!/usr/bin/env bash
-
-usage() {
-  echo "Usage: $(basename $0) [-t threads ] fastq1 [bam1 bam2 ... bamN ]" 1>&2
-  echo "" 1>&2
-  exit 1
-}
-
-while getopts ":t:" opt; do
-  case $opt in
-  t)
-    NTHREADS=$OPTARG
-   ;;
-  \?)
-   echo "Invalid option: -$OPTARG" >&2
-   usage
-   ;;
-  [?])
-   usage
-   ;;
-  :)
-   echo "Option -$OPTARG requires an argument." >&2
-   echo "" >&2
-   usage
-   ;;
-  esac
-done
-
-
-shift $((OPTIND-1))
-
-if [ -z $NTHREADS ]; then
-  if [ -z $NUMTHREADS ]; then
-    NTHREADS=1
-  else
-    NTHREADS=$NUMTHREADS
-  fi
-fi
-
-if [[ -z $@ ]]; then
-  INPUT=$(cat /dev/stdin)
-else
-  INPUT=$@
-fi
-
-samstats(){
-  INPUT=$1
-  # check if file exists
-  if [[ ! -f $INPUT ]]; then >&2 echo "file \"$INPUT\" not found"; exit 1; fi
-  # check input is a fastq
-  if [[ $INPUT != *.bam ]]; then >&2 echo "input is not a bam file"; exit 1; fi
-  
-  BASE="$(basename $INPUT)"
-  OUTPUT=${BASE}.samstats
-  
-  samtools stats $INPUT > $OUTPUT
-  echo $OUTPUT
-}
-
-export -f samstats
-
-parallel --no-notice -k -j $NTHREADS "samstats {}" ::: $INPUT
+INPUT=$1
+OUTPREFIX=$2
+OUTPUT=${OUTPREFIX}.samstats
+ 
+samtools stats $INPUT > $OUTPUT
