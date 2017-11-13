@@ -22,10 +22,10 @@ clip $fastq
 
 # align reads to genome
 index=bwaIndex_hg38/genome
-# paired-end
-align_pe $fastq1 $fastq2 $index
-# single-end
-align_se $fastq $index
+ # paired-end
+ align_pe $fastq1 $fastq2 $index
+ # single-end
+ align_se $fastq $index
 
 # check stats
 samstats $bam
