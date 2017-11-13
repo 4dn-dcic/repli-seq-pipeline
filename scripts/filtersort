@@ -18,6 +18,6 @@ if [ -z $outprefix ]; then
 fi
 
 BASE=$outprefix
-OUTPUT=${BASE}_q20_sort.bam
+OUTPUT=${BASE}.q20_sort.bam
 samtools view -bq 20 $INPUT | samtools sort -m $MEMPERTHREAD - > $OUTPUT
 
