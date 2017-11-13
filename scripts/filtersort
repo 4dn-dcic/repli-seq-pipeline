@@ -5,6 +5,10 @@ MEMPERTHREAD=$2  # default "5G"
 outdir=$3  # default "."
 outprefix=$4  # default "out"
 
+# check if file exists
+if [[ ! -f $INPUT ]]; then echo "file \"$INPUT\" not found"; exit 1; fi
+
+# default options
 if [ -z $MEMPERTHREAD ]; then
   MEMPERTHREAD=5G
 fi
@@ -17,7 +21,10 @@ if [ -z $outprefix ]; then
   outprefix=out
 fi
 
+# output file name
 BASE=$outdir/outprefix
 OUTPUT=${BASE}.q20_sort.bam
+
+# run filter/sort command
 samtools view -bq 20 $INPUT | samtools sort -m $MEMPERTHREAD - > $OUTPUT
 
