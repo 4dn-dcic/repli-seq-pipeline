@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
 INPUT=$1
-MEMPERTHREAD=$2
+MEMPERTHREAD=$2  # default "5G"
 outdir=$3  # default "."
 outprefix=$4  # default "out"
+
+if [ -z $MEMPERTHREAD ]; then
+  MEMPERTHREAD=5G
+fi
 
 if [ -z $outdir ]; then
   outdir=.
