@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-INPUT=$1
+INPUT=$1  # bam file
 MEMPERTHREAD=$2  # default "5G"
 outdir=$3  # default "."
 outprefix=$4  # default "out"
