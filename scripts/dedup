@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 INPUT=$1
-outdir=$2
-outprefix=$3
+OUTDIR=$2
+OUTPREFIX=$3
   
 # check if file exists
 if [[ ! -f $INPUT ]]; then echo "file \"$INPUT\" not found"; exit 1; fi
+
+# default options
+if [ -z $OUTDIR ]; then
+  OUTDIR=.
+fi
+
+if [ -z $OUTPREFIX ]; then
+  OUTPREFIX=out
+fi
 
 # PE vs SE
 UCOUNT=$(samtools view $INPUT | cut -f 1 | head -n 1000 | sort | uniq | wc -l)
@@ -16,7 +25,7 @@ else
 fi 
 
 # output and log file names
-BASE=$outdir/$outprefix
+BASE=$OUTDIR/$OUTPREFIX
 OUTPUT=${BASE}.rmdup.bam
 LOGFILE=${BASE}.rmdup.bam.log
 
