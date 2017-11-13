@@ -4,17 +4,17 @@
 suppressMessages(library(docopt))       # we need docopt (>= 0.3) as on CRAN
 
 ## configuration for docopt
-doc <- "Usage: smooth [-t threads] [-l lspan] [-h] [BGFILES ...]
+doc <- "Usage: smooth [-l lspan] [-d outdir] [-p outprefix] [-h] [BGFILES ...]
 
--t --threads NUMTHREADS     number of CPU threads to use [default: 0]
--l --lspan LSPAN                 span size in bp [default: 300000]
+-l --lspan LSPAN            span size in bp [default: 300000]
+-d --dir OUTDIR             output directory
+-p --prefix OUTPREFIX       output prefix
 -h --help                   show this help text"
 
 ## docopt parsing
 opt <- docopt(doc)
 bgfiles <- unlist(opt$BGFILES)
 lspan <- as.numeric(opt$lspan)
-threads <- as.numeric(opt$threads)
 
 if(length(bgfiles)==0){
   stdi <- unlist(strsplit(readLines(file("stdin"))," "))
@@ -23,14 +23,6 @@ if(length(bgfiles)==0){
   bgfiles <- stdi
 }
 
-if(threads==0){
-	nthreads <- as.numeric(Sys.getenv("NUMTHREADS"))
-	if(is.na(nthreads)){
-		threads=1
-	}else{
-		threads=nthreads
-	}
-}
 
 require(parallel,quietly=T)
 
@@ -45,15 +37,13 @@ removeext <- function( filenames ){
 
 options(scipen=9999)
 
-  if(lspan<1){
-		stop("lspan must indicate distance in bp")
-	}
+if(lspan<1) stop("lspan must indicate distance in bp")
 	
-	bgnames <- basename(removeext(bgfiles))
-	numbgs <- length(bgfiles)
-	outnames <- paste(bgnames,"_loess",lspan,".bg",sep="")
+bgnames <- basename(removeext(bgfiles))
+numbgs <- length(bgfiles)
+outnames <- paste(bgnames,".loess",lspan,".bg",sep="")
 
-	dump <- mclapply(seq_len(numbgs), function(x){
+dump <- lapply(seq_len(numbgs), function(x){
 		curbg <- as.data.frame( read.table ( bgfiles[x], header=FALSE, stringsAsFactors=FALSE ) )
 		chroms    <- unique(curbg[,1])
 		numchroms <- length(chroms)
@@ -87,6 +77,6 @@ options(scipen=9999)
 		write.table(smoothbg,file=outnames[x],col.names=FALSE,quote=FALSE, sep="\t", row.names=FALSE)
 		rm(curbg)
 		gc()
-}, mc.cores=threads, mc.preschedule=FALSE)
+})
 
 cat(paste(outnames,collapse="\n"),"\n")
