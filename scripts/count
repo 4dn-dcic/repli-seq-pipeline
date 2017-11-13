@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 INPUT=$1
-OUTPREFIX=$2
-WINSIZE=$3
-MINSIZE=$4
+OUTDIR=$2
+OUTPREFIX=$3
+WINSIZE=$4
+MINSIZE=$5
+
+if [ -z $OUTDIR ]; then
+  OUTDIR=.
+fi
 
 if [ -z $OUTPREFIX ]; then
   OUTPREFIX=out
@@ -18,12 +23,15 @@ fi
 
 # check if file exists
 if [[ ! -f $INPUT ]]; then >&2 echo "file \"$INPUT\" not found"; exit 1; fi
-  
-BASE=$OUTPREFIX
-OUTPUT=${BASE}_w${WINSIZE}.bg
-  
+
+# output file name
+BASE=$OUTDIR/OUTPREFIX
+OUTPUT=${BASE}.w${WINSIZE}.bg
+
+# determine scale
 SCALE=$(echo "1000000/$(samtools view -c $INPUT)" | bc -l)
   
+# run count command
 samtools view -H $INPUT | grep "^@SQ" | tr ':' '\t' | cut -f 3,5 | \
 awk -v minsize=$MINSIZE '$2>minsize' OFS='\t' | \
 bedtools makewindows -w $WINSIZE -g /dev/stdin | \
