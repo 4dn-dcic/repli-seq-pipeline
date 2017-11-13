@@ -2,5 +2,11 @@
 
 INPUT=$1
 MEMPERTHREAD=$2
+OUTDIR=$3
+PREFIX=$4
+
+BASE=$PREFIX
+
+OUTPUT=${BASE}_q20_sort.bam
 samtools view -bq 20 $INPUT | samtools sort -m $MEMPERTHREAD - > $OUTPUT
 
