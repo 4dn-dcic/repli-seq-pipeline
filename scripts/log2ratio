@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 EBG=$1
 LBG=$2
-OUTDIR=$3
-OUTPREFIX=$4
+OUTDIR=$3  # default "."
+OUTPREFIX=$4  # default "out"
 
 # check if file exists
 if [[ ! -f $EBG ]]; then echo "file \"$EBG\" not found"; exit 1; fi
 if [[ ! -f $LBG ]]; then echo "file \"$LBG\" not found"; exit 1; fi
+
+# default options
+if [ -z $OUTDIR ]; then
+  OUTDIR=.
+fi
+
+if [ -z $OUTPREFIX ]; then
+  OUTPREFIX=out
+fi
 
 # output and log file names
 OUTPUT=$OUTDIR/$OUTPREFIX.l2r.out  ## is this bg?
