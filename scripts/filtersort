@@ -2,11 +2,18 @@
 
 INPUT=$1
 MEMPERTHREAD=$2
-OUTDIR=$3
-PREFIX=$4
+outdir=$3  # default "."
+outprefix=$4  # default "out"
 
-BASE=$PREFIX
+if [ -z $outdir ]; then
+  outdir=.
+fi
 
+if [ -z $outprefix ]; then
+  outprefix=out
+fi
+
+BASE=$outprefix
 OUTPUT=${BASE}_q20_sort.bam
 samtools view -bq 20 $INPUT | samtools sort -m $MEMPERTHREAD - > $OUTPUT
 
