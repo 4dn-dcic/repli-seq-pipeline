@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 INPUT=$1  # .bg
-OUTDIR=$2  # default "."
-OUTPREFIX=$3  # default "out"
-MINRPKM=$4  # default 0.1
+FILTERED_BED=$2
+OUTDIR=$3  # default "."
+OUTPREFIX=$4  # default "out"
+MINRPKM=$5  # default 0.1
 
 # default options
 if [ -z $OUTDIR ]; then
@@ -18,18 +19,11 @@ if [ -z $MINRPKM ]; then
 fi
 
 # check input file
-if [[ ! -f $INPUT ]]; then >&2 echo "file \"$i\" not found"; exit 1; fi
+if [[ ! -f $INPUT ]]; then >&2 echo "file \"$INPUT\" not found"; exit 1; fi
+if [[ ! -f $FILTERED_BED ]]; then >&2 echo "file \"$FILTERED_BED\" not found"; exit 1; fi
 
-
-paste $INPUT | awk -v minrpkm=$MINRPKM \
-  '{for(i=4;i<=NF;i+=4){scoresum+=$i}; if((scoresum/(NF/4))>=minrpkm){print $1,$2,$3};scoresum=0}' \
-OFS='\t' > filtered.bed
-
-BG=$INPUT
-FW=filtered.bed
-  
+# output file name  
 BASE=$OUTDIR/$OUTPREFIX
 OUTPUT="${BASE}.filtered.bg"
   
-bedtools intersect -sorted -u -a $BG -b $FW > $OUTPUT
- 
+bedtools intersect -sorted -u -a $INPUT -b $FILTERED_BED > $OUTPUT
