@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# usage : outdir outprefix inputbg1 inputbg2 inputbg3 ...
 OUTDIR=$1
 OUTPREFIX=$2
 shift
