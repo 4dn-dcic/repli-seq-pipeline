@@ -42,8 +42,11 @@ dedup $sbam
 # calculate RPKM bedGraphs for each set of alignments
 count $rbam
 
+# make a bed file for filtering based on sum of scores across all count bg files
+make_filteredbed $bg1 $bg2 ...
+
 # filter windows with a low average RPKM
-filter $bg
+filter $bg $filteredbed
 
 # calculate log2 ratios between early and late
 log2ratio $fbg
