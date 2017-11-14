@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
-INPUT=$1
-OUTDIR=$2
-OUTPREFIX=$3
+OUTDIR=$1
+OUTPREFIX=$2
+shift
+shift
 
-if [ -z $OUTDIR ]; then
-  OUTDIR=.
-fi
-
-if [ -z $OUTPREFIX ]; then
-  OUTPREFIX=out
-fi
+INFILESTR=${@}
+INFILES=(${INFILESTR// / })
+NFILES=${#INFILES[@]}
 
 FILTERED_BED=$OUTDIR/$OUTPREFIX.filtered.bed
 
-paste $INPUT | awk -v minrpkm=$MINRPKM \
+paste $INFILESTR | awk -v minrpkm=$MINRPKM \
   '{for(i=4;i<=NF;i+=4){scoresum+=$i}; if((scoresum/(NF/4))>=minrpkm){print $1,$2,$3};scoresum=0}' \
 OFS='\t' > $FILTERED_BED
