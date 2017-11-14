@@ -1,0 +1,9 @@
+INPUT=$1
+OUTDIR=$2
+OUTPREFIX=$3
+
+FILTERED_BED=$OUTDIR/$OUTPREFIX.filtered.bed
+
+paste $INPUT | awk -v minrpkm=$MINRPKM \
+  '{for(i=4;i<=NF;i+=4){scoresum+=$i}; if((scoresum/(NF/4))>=minrpkm){print $1,$2,$3};scoresum=0}' \
+OFS='\t' > $FILTERED_BED
