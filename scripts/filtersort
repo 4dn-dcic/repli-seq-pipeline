@@ -27,7 +27,7 @@ if [ -z $outprefix ]; then
 fi
 
 # output file name
-BASE=$outdir/outprefix
+BASE=$outdir/$outprefix
 OUTPUT=${BASE}.q20_sort.bam
 FILTERED_BAM=${BASE}.q20.bam  # intermediate
 
