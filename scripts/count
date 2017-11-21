@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 INPUT=$1
-OUTDIR=$2
-OUTPREFIX=$3
-WINSIZE=$4
-MINSIZE=$5
+CHROMSIZE=$2
+OUTDIR=$3
+OUTPREFIX=$4
+WINSIZE=$5
+MINSIZE=$6
 
 if [ -z $OUTDIR ]; then
   OUTDIR=.
@@ -23,17 +24,22 @@ fi
 
 # check if file exists
 if [[ ! -f $INPUT ]]; then >&2 echo "file \"$INPUT\" not found"; exit 1; fi
+if [[ ! -f $CHROMSIZE ]]; then >&2 echo "file \"$CHROMSIZE\" not found"; exit 1; fi
 
 # output file name
-BASE=$OUTDIR/OUTPREFIX
+BASE=$OUTDIR/$OUTPREFIX
 OUTPUT=${BASE}.w${WINSIZE}.bg
 
 # determine scale
 SCALE=$(echo "1000000/$(samtools view -c $INPUT)" | bc -l)
   
 # run count command
-samtools view -H $INPUT | grep "^@SQ" | tr ':' '\t' | cut -f 3,5 | \
-awk -v minsize=$MINSIZE '$2>minsize' OFS='\t' | \
-bedtools makewindows -w $WINSIZE -g /dev/stdin | \
-bedtools coverage -counts -sorted -c -a stdin -b $INPUT | \
-awk -v scale=$SCALE '{print $1,$2,$3,$4*1000*(scale/($3-$2)) }' OFS='\t' > $OUTPUT
+bedtools makewindows -w $WINSIZE -g $CHROMSIZE > $OUTPUT.tmp 
+{ # try
+    # This command returns 1 even when it succeeds. This try/catch is to prevent this script from exiting with 1 when run successfully.
+    bedtools coverage -counts -sorted -c -a $OUTPUT.tmp -b $INPUT > $OUTPUT.tmp2
+} || { # catch
+    true
+}
+
+awk -v scale=$SCALE '{print $1,$2,$3,$4*1000*(scale/($3-$2)) }' OFS='\t' $OUTPUT.tmp2 > $OUTPUT
