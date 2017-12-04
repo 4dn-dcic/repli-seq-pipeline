@@ -5,6 +5,7 @@ OUTPREFIX=$2
 MINRPKM=$3  # e.g. 0.1
 shift
 shift
+shift
 
 INFILESTR=${@}
 INFILES=(${INFILESTR// / })
