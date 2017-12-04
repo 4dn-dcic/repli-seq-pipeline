@@ -35,10 +35,10 @@ options(scipen=9999)
 
 if(lspan<1) stop("lspan must indicate distance in bp")
 	
-outname <- paste(outdir,"/",prefix,".loess",lspan,".bg",sep="")
+outname <- paste(outdir,"/",outprefix,".loess",lspan,".bg",sep="")
 
 dump <- function(bgfile){
-		curbg <- as.data.frame( read.table ( bgfiles, header=FALSE, stringsAsFactors=FALSE ) )
+		curbg <- as.data.frame( read.table ( bgfile, header=FALSE, stringsAsFactors=FALSE ) )
 		chroms    <- unique(curbg[,1])
 		numchroms <- length(chroms)
 		all=split(curbg,curbg[,1])
@@ -69,6 +69,6 @@ dump <- function(bgfile){
 		write.table(smoothbg,file=outname,col.names=FALSE,quote=FALSE, sep="\t", row.names=FALSE)
 		rm(curbg)
 		gc()
-})
+}
 
 dump(bgfile)

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 INPUT=$1
-OUTDIR=$2  # default "."
-OUTPREFIX=$3  # default "out"
-REFERENCE=$4  # optional bedgraph (.bg) file
+REFERENCE=$2  # optional bedgraph (.bg) file
+OUTDIR=$3  # default "."
+OUTPREFIX=$4  # default "out"
 
 # check input file exists
 if [[ ! -f $INPUT ]]; then >&2 echo "file \"$i\" not found"; exit 1; fi
@@ -55,8 +55,6 @@ normalize(){
     cut -f 1,2,3,8 | sort -k1,1 -k2,2n > $OUTPUT
   
   rm -f $TMPREFN
-  
-  echo $OUTPUT
 }
 
 if [[ ! -f $REFERENCE ]]; then
