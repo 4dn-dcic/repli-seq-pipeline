@@ -3,7 +3,6 @@ INPUT=$1  # .bg
 FILTERED_BED=$2
 OUTDIR=$3  # default "."
 OUTPREFIX=$4  # default "out"
-MINRPKM=$5  # default 0.1
 
 # default options
 if [ -z $OUTDIR ]; then
@@ -12,10 +11,6 @@ fi
 
 if [ -z $OUTPREFIX ]; then
   OUTPREFIX=out
-fi
-
-if [ -z $MINRPKM ]; then
-  MINRPKM=0.1
 fi
 
 # check input file

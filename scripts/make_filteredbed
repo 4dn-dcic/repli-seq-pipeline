@@ -2,6 +2,7 @@
 # usage : outdir outprefix inputbg1 inputbg2 inputbg3 ...
 OUTDIR=$1
 OUTPREFIX=$2
+MINRPKM=$3  # e.g. 0.1
 shift
 shift
 
