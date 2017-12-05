@@ -39,22 +39,29 @@ normalize(){
   BG=$1
   RF=$2
   
-  BASE=$OUTDIR/$OUTPREFIX
-  OUTPUT="${BASE}.qnorm.bg"
+  BASE="$(basename $BG | sed 's/\.bg$//g')"
+  OUTPUT="${BASE}_qnorm.bg"
   BGLINES=$(cat $BG | wc -l)
   RFLINES=$(cat $RF | wc -l)
-  TMPREFN="$(mktemp).bg"
   
   if [[ $BGLINES -gt $RFLINES ]]; then
+    TMPREFN=$(mktemp)
     COPYNUM=$((1+BGLINES/RFLINES))
     cat $(yes "$RF" | head -n $COPYNUM) > $TMPREFN
     RF=$TMPREFN
+    paste <(sort -T . -k4,4g $BG) <(shuf -n $BGLINES $RF | sort -k4,4g) | \
+    cut -f 1,2,3,8 | \
+    sort -k1,1 -k2,2n > $OUTPUT
+    rm -f $TMPREFN
+  elif [[ $BGLINES -eq $RFLINES ]]; then
+    paste <(sort -T . -k4,4g $BG) <(sort -T . -k4,4g $RF) | \
+    cut -f 1,2,3,8 | sort -k1,1 -k2,2n > $OUTPUT
+  else
+    paste <(sort -T . -k4,4g $BG) <(shuf -n $BGLINES $RF | sort -k4,4g) | \
+    cut -f 1,2,3,8 | sort -k1,1 -k2,2n > $OUTPUT
   fi
   
-  paste <(sort -T . -k4,4g $BG) <(shuf -n $BGLINES $RF | sort -k4,4g) | \
-    cut -f 1,2,3,8 | sort -k1,1 -k2,2n > $OUTPUT
-  
-  rm -f $TMPREFN
+  echo $OUTPUT
 }
 
 if [[ ! -f $REFERENCE ]]; then
