@@ -39,8 +39,8 @@ normalize(){
   BG=$1
   RF=$2
   
-  BASE="$(basename $BG | sed 's/\.bg$//g')"
-  OUTPUT="${BASE}_qnorm.bg"
+  BASE=$OUTDIR/$OUTPREFIX
+  OUTPUT="${BASE}.qnorm.bg"
   BGLINES=$(cat $BG | wc -l)
   RFLINES=$(cat $RF | wc -l)
   
