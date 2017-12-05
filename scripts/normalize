@@ -35,7 +35,7 @@ iqrn(){
   echo $OUTPUT
 }
 
-normalize(){
+qnormalize(){
   BG=$1
   RF=$2
   
@@ -72,6 +72,6 @@ if [[ ! -f $REFERENCE ]]; then
   REFERENCE=$tmprefi
 fi
 
-normalize $INPUT $REFERENCE
+qnormalize $INPUT $REFERENCE
 
 rm -f tmprefi
