@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 INPUT=$1
-REFERENCE=$2  # optional bedgraph (.bg) file
-OUTDIR=$3  # default "."
-OUTPREFIX=$4  # default "out"
+OUTDIR=$2  # default "."
+OUTPREFIX=$3  # default "out"
+REFERENCE=$4  # optional bedgraph (.bg) file
 
 # check input file exists
 if [[ ! -f $INPUT ]]; then >&2 echo "file \"$i\" not found"; exit 1; fi
