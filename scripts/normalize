@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 INPUT=$1
-OUTDIR=$2  # default "."
-OUTPREFIX=$3  # default "out"
-REFERENCE=$4  # optional bedgraph (.bg) file
+REFERENCE=$2
+OUTDIR=$3  # default "."
+OUTPREFIX=$4  # default "out"
 
 # check input file exists
-if [[ ! -f $INPUT ]]; then >&2 echo "file \"$i\" not found"; exit 1; fi
+if [[ ! -f $INPUT ]]; then >&2 echo "file \"$INPUT\" not found"; exit 1; fi
+if [[ ! -f $REFERENCE ]]; then >&2 echo "file \"$REFERENCE\" not found"; exit 1; fi
 
 # default options
 if [ -z $OUTDIR ]; then
@@ -15,25 +16,6 @@ fi
 if [ -z $OUTPREFIX ]; then
   OUTPREFIX=out
 fi
-
-
-iqrn(){
-  BG=$1
-  BASE=$OUTDIR/$OUTPREFIX
-  OUTPUT="${BASE}.inorm.bg"
-  
-  NUMLINES=$(cat $BG | wc -l)
-  Q1=$(echo $NUMLINES/4 | bc)
-  Q2=$(echo $NUMLINES/2 | bc)
-  Q3=$(echo 3*$NUMLINES/4 | bc)
-  ST=$(sort -k4,4n $BG | \
-    awk -v q1=$Q1 -v q2=$Q2 -v q3=$Q3 '{if(NR==q1){Q1=$4};if(NR==q2){Q2=$4};if(NR==q3){Q3=$4}}END{print Q3-Q1,Q2}')
-  REFIQR=5.5
-  IQR=$(echo $ST | cut -d ' ' -f 1)
-  MDN=$(echo $ST | cut -d ' ' -f 2)
-  awk -v refiqr=$REFIQR -v mdn=$MDN -v iqr=$IQR 'BEGIN{scalar=refiqr/iqr} {print $1,$2,$3,($4-mdn)*scalar}' OFS='\t' $BG > $OUTPUT
-  echo $OUTPUT
-}
 
 qnormalize(){
   BG=$1
@@ -64,14 +46,5 @@ qnormalize(){
   echo $OUTPUT
 }
 
-if [[ ! -f $REFERENCE ]]; then
-  >&2 echo "reference file not found, making an average distribution"
-  INPUTI=$(iqrn $INPUT)
-  tmprefi="$(mktemp).bg"
-  cat $INPUTI > $tmprefi
-  REFERENCE=$tmprefi
-fi
-
 qnormalize $INPUT $REFERENCE
 
-rm -f tmprefi
