@@ -2,8 +2,6 @@
 # usage : outdir outprefix nthreads inputbg1 inputbg2 inputbg3 ...
 OUTDIR=$1  # eg "."
 OUTPREFIX=$2  # eg "out"
-NTHREADS=$3
-shift
 shift
 shift
 
@@ -13,7 +11,10 @@ NFILES=${#INFILES[@]}
 
 
 # check input file exists
-if [[ ! -f $INPUT ]]; then >&2 echo "file \"$i\" not found"; exit 1; fi
+for i in $INFILESTR
+do
+  if [[ ! -f $i ]]; then >&2 echo "file \"$i\" not found"; exit 1; fi
+done
 
 # default options
 if [ -z $OUTDIR ]; then
@@ -44,5 +45,10 @@ iqrn(){
   echo $OUTPUT
 }
 
-INPUTI=$(parallel --no-notice -k -j $NTHREADS "iqrn {}" ::: $INFILESTR)
-cat $INPUTI > $OUTPUTALL
+
+rm -rf $OUTPUTALL
+touch $OUTPUTALL
+for i in $INFILESTR
+do
+  cat $(iqrn $i) >> $OUTPUTALL 
+done
