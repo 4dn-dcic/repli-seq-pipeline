@@ -2,7 +2,7 @@
 
 INPUT=$1  # bam file
 MEMPERTHREAD=$2  # default "5G"
-NEXTRATHREADS=$3  # default 0
+NTHREADS=$3  # default 1
 outdir=$4  # default "."
 outprefix=$5  # default "out"
 
@@ -14,9 +14,10 @@ if [ -z $MEMPERTHREAD ]; then
   MEMPERTHREAD=5G
 fi
 
-if [ -z $NEXTRATHREADS ]; then
-  NEXTRATHREADS=0
+if [ -z $NTHREADS ]; then
+  NTHREADS=1
 fi
+NEXTRATHREADS=$(echo "$NTHREADS - 1" | bc) 
 
 if [ -z $outdir ]; then
   outdir=.
