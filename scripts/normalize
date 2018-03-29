@@ -20,8 +20,19 @@ fi
 BG=$INPUT
 RF=$REFERENCE
 
+if [[ $INPUT =~ \.gz$ ]]
+then
+  cp $INPUT $OUTDIR/input.bedGraph.gz
+  gunzip $OUTDIR/input.bedGraph.gz
+  INPUT=$OUTDIR/input.bedGraph
+else
+  cp $INPUT $OUTDIR/input.bedGraph
+  INPUT=$OUTDIR/input.bedGraph
+fi
+
+
 BASE=$OUTDIR/$OUTPREFIX
-OUTPUT="${BASE}.qnorm.bg"
+OUTPUT="${BASE}.qnorm.bedGraph"
 BGLINES=$(cat $BG | wc -l)
 RFLINES=$(cat $RF | wc -l)
 
@@ -42,3 +53,4 @@ else
   cut -f 1,2,3,8 | sort -k1,1 -k2,2n > $OUTPUT
 fi
 
+bgzip $OUTPUT

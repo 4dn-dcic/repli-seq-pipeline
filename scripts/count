@@ -23,7 +23,7 @@ if [[ ! -f $CHROMSIZE ]]; then >&2 echo "file \"$CHROMSIZE\" not found"; exit 1;
 
 # output file name
 BASE=$OUTDIR/$OUTPREFIX
-OUTPUT=${BASE}.w${WINSIZE}.bg
+OUTPUT=${BASE}.w${WINSIZE}.bedGraph
 BINFILE=${BASE}.w${WINSIZE}.bin
 COVERAGEFILE=${BASE}.w${WINSIZE}.cov
 
@@ -40,3 +40,4 @@ bedtools makewindows -w $WINSIZE -g $CHROMSIZE > $BINFILE
 }
 
 awk -v scale=$SCALE '{print $1,$2,$3,$4*1000*(scale/($3-$2)) }' OFS='\t' $COVERAGEFILE > $OUTPUT
+bgzip $OUTPUT
