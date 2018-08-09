@@ -3,7 +3,7 @@ INPUT=$1  # both single-end and paired-end data are fed as a single fastq file.
 INDEX=$2
 OUTDIR=$3
 PREFIX=$4
-NTHREADS=$3
+NTHREADS=$5
   
 ISPAIRED=$(head -n 8 $INPUT | paste - - - - | awk '{print $1}' | uniq -c | awk '{print $1}' | head -n 1)
 if [[ $ISPAIRED -eq 2 ]]; then
