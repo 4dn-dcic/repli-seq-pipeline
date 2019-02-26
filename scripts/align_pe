@@ -1,0 +1,20 @@
+#!/bin/bash
+set -o pipefail
+
+INPUT=$1 #R1
+INPUT2=$1 #R2
+INDEX=$3
+OUTDIR=$4
+PREFIX=$5
+NTHREADS=$6
+  
+# check if file exists
+if [[ ! -f $INPUT ]]; then echo "fastq file \"$INPUT\" not found"; exit 1; fi
+if [[ ! -f $INPUT2 ]]; then echo "fastq file \"$INPUT2\" not found"; exit 1; fi
+
+
+OUTPUT=$OUTDIR/$PREFIX.bam
+LOGFILE=${OUTPUT}.log
+
+bwa mem -v 2 -t $NTHREADS $INDEX $INPUT $INPUT2 | samtools view -Shb - > $OUTPUT || exit
+echo $OUTPUT
