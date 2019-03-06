@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+set -o pipefail
+set -e
+
 INPUT=$1
 CHROMSIZE=$2
 OUTDIR=$3
@@ -26,22 +29,22 @@ BASE=$OUTDIR/$OUTPREFIX
 OUTPUT=${BASE}.w${WINSIZE}.bedGraph
 BINFILE=${BASE}.w${WINSIZE}.bin
 COVERAGEFILE=${BASE}.w${WINSIZE}.cov
+FULLCHRSIZE=${BASE}.full.chrsize
 
 # determine scale
 SCALE=$(echo "1000000/$(samtools view -c $INPUT)" | bc -l)
 
+# get full chromsize from ban header
+samtools view -H $INPUT | bamH2chrsize > $FULLCHRSIZE
+
 # run count command
-bedtools makewindows -w $WINSIZE -g $CHROMSIZE > $BINFILE
+bedtools makewindows -w $WINSIZE -g $FULLCHRSIZE > $BINFILE
+ 
+# get full coverage file 
+bedtools coverage -counts -sorted -a $BINFILE -b $INPUT > $COVERAGEFILE
 
-# sort binfile so that we can use sweepchrom algorithm for intersection
-sort -k1,1 -k2,2n $BINFILE > $BINFILE.sorted
-  
-{ # try
-    # This command returns 1 even when it succeeds. This try/catch is to prevent this script from exiting with 1 when run successfully.
-    bedtools coverage -counts -sorted -a $BINFILE.sorted -b $INPUT > $COVERAGEFILE
-} || { # catch
-    true
-}
+# filter coverage by input chromsize
+filtercov $COVERAGEFILE $CHROMSIZE > $COVERAGEFILE.filtered
 
-awk -v scale=$SCALE '{print $1,$2,$3,$4*1000*(scale/($3-$2)) }' OFS='\t' $COVERAGEFILE > $OUTPUT
+awk -v scale=$SCALE '{print $1,$2,$3,$4*1000*(scale/($3-$2)) }' OFS='\t' $COVERAGEFILE.filtered > $OUTPUT
 bgzip $OUTPUT

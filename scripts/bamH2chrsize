@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+while(<>){
+  next if !/^@SQ/;
+  if(/SN:(\w+)\s+LN:(\d+)/){ print "$1\t$2\n"; }
+}

@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+$covfile = shift @ARGV;
+$chromsizefile = shift @ARGV;
+
+open $FH, $chromsizefile || die "Can't open $chromsizefile";
+while(<$FH>){
+   my ($chr) = (split/\t/)[0];
+   $chrlist{$chr} = 1;
+}
+close $FH;
+
+open $COV, $covfile || die "Can't open $covfile";
+while(<$COV>){
+    my ($chr) = (split/\t/)[0];
+    if(exists $chrlist{$chr}){
+        print;
+    }
+}
+close $COV;
+
+
